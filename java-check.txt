@@ -1,0 +1,20 @@
+#!/bin/bash
+
+sudo apt update
+sudo apt install -y default-jre
+
+# By using this commend we`re checking the Java version which we redirect the output to a special file (/dev/null) so we`ll not see the output in the commend line(2>&1), in the end we`ll forward to output using pipe and find the Java version by using a string which grabs the third section of the java -version commend.
+
+java_version=$(java -version > /dev/null 2>&1 | grep "java version\|openjdk version" | awk '{print substr($3,2,2)}')
+
+if [ "$java_version" == ""  ]
+then
+    echo Installing Java has failed. No java version found
+elif [ "$java_version" == "1." ]
+then
+    echo An old version of Java installation found
+elif [ "$java_version" -ge "11" ]
+then
+    echo Java version 11 or greater installed successfully
+fi
+

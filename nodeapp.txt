@@ -1,0 +1,48 @@
+#!/bin/bash
+
+sudo apt update
+NEW_USER=myapp
+
+echo " Installing nodejs, npm ,curl , wget , net-tools"
+
+sudo apt install -y nodejs npm curl wget net-tools
+sleep 5
+echo "############################"
+
+echo -n "Set log directory location for app (absolute path):"
+read LOG_DIRECTORY
+if [ -d $LOG_DIRECTORY ]
+then
+echo "$LOG_DIRECTORY already exists."
+else
+mkdir -p $LOG_DIRECTORY
+echo "$LOG_DIRECTORY has been created."
+fi
+
+node_version=$(node --version)
+echo "NodeJS version $node_version installed."
+npm_version=$(npm --version)
+echo "NPM version $npm_version installed."
+
+echo "##############################"
+
+useradd $NEW_USER -m
+chown $NEW_USER -R $LOG_DIRECTORY
+
+runuser -l $NEW_USER -c "wget https://node-envvars-artifact.s3.eu-west-2.amazonaws.com/bootcamp-node-envvars-project-1.0.0.tgz"
+
+runuser -l $NEW_USER -c "tar zxvf ./bootcamp-node-envvars-project-1.0.0.tgz"
+
+runuser -l $NEW_USER -c " 
+export APP_ENV=dev && 
+export DB_PWD=mysecret && 
+export DB_USER=myuser && 
+export LOG_DIR=$LOG_DIRECTORY && 
+cd package && 
+npm install && 
+node server.js &"
+
+ps aux |  grep node | grep -v grep
+netstat -ltnp | grep :3000
+
+
